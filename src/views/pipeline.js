@@ -16,7 +16,7 @@ export async function renderPipeline(container, { profile }) {
 
   const { data: releases, error } = await supabase
     .from('releases')
-    .select('id, title, release_date, release_type, cover_url, pipeline_status, release_artists(artists(name))')
+    .select('id, title, release_date, release_type, cover_url, pipeline_status, release_artists(artists(stage_name))')
     .order('created_at', { ascending: false });
 
   if (error) { container.innerHTML = `<p style="color:var(--a2)">${error.message}</p>`; return; }
@@ -68,7 +68,7 @@ export async function renderPipeline(container, { profile }) {
 }
 
 function renderCard(r, currentStage, canEdit) {
-  const artists = (r.release_artists || []).map(ra => ra.artists?.name).filter(Boolean).join(', ') || '—';
+  const artists = (r.release_artists || []).map(ra => ra.artists?.stage_name).filter(Boolean).join(', ') || '—';
   const date = r.release_date ? new Date(r.release_date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : null;
 
   return `

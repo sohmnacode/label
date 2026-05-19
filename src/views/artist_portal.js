@@ -9,7 +9,7 @@ export async function renderArtistPortal(container, { profile }) {
     { data: splits },
     { data: contracts },
   ] = await Promise.all([
-    supabase.from('releases').select('*, release_artists(artists(name))').order('release_date', { ascending: false }).limit(20),
+    supabase.from('releases').select('*, release_artists(artists(stage_name))').order('release_date', { ascending: false }).limit(20),
     supabase.from('release_artists').select('*, releases(id, title, release_date, cover_url, status)'),
     supabase.from('contracts').select('*').order('expires_at'),
   ]);
@@ -65,7 +65,7 @@ export async function renderArtistPortal(container, { profile }) {
         ${(releases || []).length ? `
           <div style="padding:8px">
             ${(releases || []).slice(0, 6).map(r => {
-              const artists = (r.release_artists || []).map(ra => ra.artists?.name).filter(Boolean).join(', ');
+              const artists = (r.release_artists || []).map(ra => ra.artists?.stage_name).filter(Boolean).join(', ');
               return `
                 <div style="display:flex;align-items:center;gap:10px;padding:8px;border-radius:var(--radius-sm);cursor:pointer;transition:background .15s" onmouseover="this.style.background='var(--glass-2)'" onmouseout="this.style.background=''">
                   ${r.cover_url

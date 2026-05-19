@@ -14,7 +14,7 @@ export async function renderRoyalties(container, { profile }) {
 
   container.innerHTML = `<div class="loading-full"><span class="spinner"></span> Loading…</div>`;
 
-  const { data: artists } = await supabase.from('artists').select('id, name').order('name');
+  const { data: artists } = await supabase.from('artists').select('id, stage_name').order('stage_name');
   const { data: allEntries } = await supabase.from('ledger').select('*');
 
   const entryMap = {};
@@ -31,7 +31,7 @@ export async function renderRoyalties(container, { profile }) {
     </div>
     ${!artists?.length ? `<div style="text-align:center;padding:80px;color:var(--t3)">No artists yet — add artists in Roster first.</div>` : `
     <div class="stat-grid" style="margin-bottom:28px" id="artist-cards">
-      ${(artists || []).map(a => artistCard(a, entryMap[a.id] || [])).join('')}
+      ${(artists || []).map(a => artistCard({ ...a, name: a.stage_name }, entryMap[a.id] || [])).join('')}
     </div>
     <div id="ledger-panel"></div>
     `}
@@ -52,7 +52,7 @@ export async function renderRoyalties(container, { profile }) {
     card.addEventListener('click', () => selectArtist(card.dataset.id, card.dataset.name));
   });
 
-  if (artists.length) selectArtist(artists[0].id, artists[0].name);
+  if (artists.length) selectArtist(artists[0].id, artists[0].stage_name || artists[0].name);
 }
 
 function artistCard(artist, entries) {
