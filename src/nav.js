@@ -1,6 +1,7 @@
 import { navigate } from './router.js';
 import { supabase } from './supabase.js';
 import { toast } from './toast.js';
+import { checkGhostStatus } from './ghostClient.js';
 
 export function renderNav(profile) {
   const role = profile?.role || 'artist';
@@ -30,6 +31,10 @@ export function renderNav(profile) {
           </button>
         `).join('')}
       </div>
+      <div id="ghost-status" style="padding:8px 14px 0;font-size:10px;letter-spacing:.08em;color:var(--t4);display:flex;align-items:center;gap:6px">
+        <span id="ghost-dot" style="width:5px;height:5px;border-radius:50%;background:var(--t4);flex-shrink:0"></span>
+        GHOST <span id="ghost-label">checking…</span>
+      </div>
       <div class="nav-bottom">
         <div class="nav-user">
           <div class="nav-avatar">${initials}</div>
@@ -48,6 +53,20 @@ export function bindNav() {
   document.querySelectorAll('.nav-link').forEach(el => {
     el.addEventListener('click', () => navigate(el.dataset.route));
   });
+
+  // Ghost status indicator
+  async function updateGhostStatus() {
+    const dot   = document.getElementById('ghost-dot');
+    const label = document.getElementById('ghost-label');
+    if (!dot || !label) return;
+    const alive = await checkGhostStatus();
+    dot.style.background   = alive ? 'var(--a)' : 'var(--t4)';
+    dot.style.boxShadow    = alive ? '0 0 6px rgba(62,207,142,0.6)' : 'none';
+    label.textContent      = alive ? 'online' : 'offline';
+    label.style.color      = alive ? 'var(--a)' : 'var(--t4)';
+  }
+  updateGhostStatus();
+  setInterval(updateGhostStatus, 15000);
 
   const signout = document.getElementById('nav-signout');
   if (signout) {
