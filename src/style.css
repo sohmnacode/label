@@ -531,6 +531,33 @@ tbody tr:hover td{background:var(--glass-2)}
 .upload-preview{display:flex;align-items:center;gap:10px;width:100%}
 .upload-filename{font-size:11px;color:var(--t2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
+/* ── Kanban ──────────────────────────────────────────────────────────────────── */
+.kanban{
+  display:flex;gap:14px;overflow-x:auto;
+  align-items:flex-start;padding-bottom:16px;
+}
+.kanban-col{
+  flex-shrink:0;width:220px;
+  background:var(--glass-1);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  overflow:hidden;
+}
+.kanban-col-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:11px 14px;
+  border-bottom:1px solid var(--border);
+  background:var(--glass-1);
+}
+.kanban-cards{overflow-y:auto;max-height:calc(100vh - 260px)}
+.kanban-card{
+  padding:12px 14px;
+  border-bottom:1px solid rgba(255,255,255,0.04);
+  transition:background .15s;
+}
+.kanban-card:last-child{border-bottom:none}
+.kanban-card:hover{background:var(--glass-2)}
+
 /* ── Responsive ─────────────────────────────────────────────────────────────── */
 @media(max-width:768px){
   .nav{display:none}

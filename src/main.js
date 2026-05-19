@@ -9,6 +9,10 @@ import { renderReleases } from './views/releases.js';
 import { renderSplits } from './views/splits.js';
 import { renderContracts } from './views/contracts.js';
 import { renderInviteAccept } from './views/invite.js';
+import { renderPipeline } from './views/pipeline.js';
+import { renderRoyalties } from './views/royalties.js';
+import { renderANR } from './views/anr.js';
+import { renderPitches } from './views/pitches.js';
 
 const app = document.getElementById('app');
 
@@ -71,8 +75,12 @@ async function initApp(session) {
   registerRoute('/dashboard', s => renderDashboard(content, s));
   registerRoute('/roster',    s => renderRoster(content, s));
   registerRoute('/releases',  s => renderReleases(content, s));
+  registerRoute('/pipeline',  s => renderPipeline(content, s));
   registerRoute('/splits',    s => renderSplits(content, s));
   registerRoute('/contracts', s => renderContracts(content, s));
+  registerRoute('/royalties', s => renderRoyalties(content, s));
+  registerRoute('/anr',       s => renderANR(content, s));
+  registerRoute('/pitches',   s => renderPitches(content, s));
 
   initRouter(state);
 

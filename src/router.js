@@ -20,8 +20,12 @@ const ROUTE_TITLES = {
   '/dashboard': 'Dashboard',
   '/roster':    'Roster',
   '/releases':  'Releases',
+  '/pipeline':  'Pipeline',
   '/splits':    'Split Sheets',
   '/contracts': 'Contracts',
+  '/royalties': 'Royalties',
+  '/anr':       'A&R',
+  '/pitches':   'Pitches',
 };
 
 function handleRoute() {
