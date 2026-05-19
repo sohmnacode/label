@@ -18,14 +18,17 @@ export function initRouter(state) {
 
 const ROUTE_TITLES = {
   '/dashboard': 'Dashboard',
+  '/calendar':  'Calendar',
   '/roster':    'Roster',
   '/releases':  'Releases',
   '/pipeline':  'Pipeline',
   '/splits':    'Split Sheets',
-  '/contracts': 'Contracts',
   '/royalties': 'Royalties',
+  '/budget':    'Budget',
+  '/contracts': 'Contracts',
   '/anr':       'A&R',
   '/pitches':   'Pitches',
+  '/press':     'Press & Radio',
 };
 
 function handleRoute() {

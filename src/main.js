@@ -13,6 +13,10 @@ import { renderPipeline } from './views/pipeline.js';
 import { renderRoyalties } from './views/royalties.js';
 import { renderANR } from './views/anr.js';
 import { renderPitches } from './views/pitches.js';
+import { renderCalendar } from './views/calendar.js';
+import { renderBudget } from './views/budget.js';
+import { renderPress } from './views/press.js';
+import { renderArtistPortal } from './views/artist_portal.js';
 
 const app = document.getElementById('app');
 
@@ -72,15 +76,18 @@ async function initApp(session) {
   const content = document.getElementById('view-content');
 
   // Register routes
-  registerRoute('/dashboard', s => renderDashboard(content, s));
+  registerRoute('/dashboard', s => s.profile?.role === 'artist' ? renderArtistPortal(content, s) : renderDashboard(content, s));
   registerRoute('/roster',    s => renderRoster(content, s));
   registerRoute('/releases',  s => renderReleases(content, s));
   registerRoute('/pipeline',  s => renderPipeline(content, s));
   registerRoute('/splits',    s => renderSplits(content, s));
   registerRoute('/contracts', s => renderContracts(content, s));
   registerRoute('/royalties', s => renderRoyalties(content, s));
+  registerRoute('/budget',    s => renderBudget(content, s));
   registerRoute('/anr',       s => renderANR(content, s));
   registerRoute('/pitches',   s => renderPitches(content, s));
+  registerRoute('/calendar',  s => renderCalendar(content, s));
+  registerRoute('/press',     s => renderPress(content, s));
 
   initRouter(state);
 

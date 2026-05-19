@@ -17,9 +17,6 @@ ALTER TABLE ledger ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Owner/team read ledger"  ON ledger FOR SELECT USING (get_my_role() IN ('owner','team'));
 CREATE POLICY "Owner/team write ledger" ON ledger FOR ALL    USING (get_my_role() IN ('owner','team'));
-CREATE POLICY "Artist read own ledger"  ON ledger FOR SELECT USING (
-  artist_id IN (SELECT id FROM artists WHERE profile_id = auth.uid())
-);
 
 -- ─── A&R demos ────────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS anr_demos (
@@ -54,11 +51,3 @@ CREATE TABLE IF NOT EXISTS pitches (
 ALTER TABLE pitches ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Owner/team manage pitches" ON pitches FOR ALL USING (get_my_role() IN ('owner','team'));
-CREATE POLICY "Artist read pitches for their releases" ON pitches FOR SELECT USING (
-  release_id IN (
-    SELECT r.id FROM releases r
-    JOIN release_artists ra ON ra.release_id = r.id
-    JOIN artists a ON a.id = ra.artist_id
-    WHERE a.profile_id = auth.uid()
-  )
-);

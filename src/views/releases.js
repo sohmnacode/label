@@ -2,6 +2,7 @@ import { supabase } from '../supabase.js';
 import { openModal, closeModal } from '../modal.js';
 import { toast } from '../toast.js';
 import { renderTracklist } from './tracks.js';
+import { renderChecklist } from './checklist.js';
 import { fileUploadField, bindFileUploads } from '../upload.js';
 import { spotifySearchRelease, spotifyGetAlbumTracks, isSpotifyConfigured } from '../v4.js';
 import { checkGhostStatus, ghostCatalogVerify, ghostISRCIntel } from '../ghostClient.js';
@@ -116,6 +117,7 @@ async function loadReleases(container, state, isOwner, search) {
       expandRow.innerHTML = `
         <td colspan="${colCount}" style="padding:0 18px 20px;background:rgba(255,255,255,0.015)">
           <div id="tracklist-inner-${id}"></div>
+          <div id="checklist-inner-${id}"></div>
           <div id="ecosystem-panel-${id}" style="margin-top:4px"></div>
         </td>`;
       row.insertAdjacentElement('afterend', expandRow);
@@ -124,6 +126,11 @@ async function loadReleases(container, state, isOwner, search) {
       if (release) {
         await renderTracklist(
           document.getElementById(`tracklist-inner-${id}`),
+          release,
+          isOwner
+        );
+        await renderChecklist(
+          document.getElementById(`checklist-inner-${id}`),
           release,
           isOwner
         );
