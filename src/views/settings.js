@@ -20,7 +20,8 @@ export async function renderSettings(container, { profile }) {
       </div>
     </div>
 
-    <!-- Label Profile -->
+    <!-- Label Profile (owner only) -->
+    ${isOwner ? `
     <div class="table-wrap" style="margin-bottom:24px">
       <div class="table-header"><span class="table-title">Label Profile</span></div>
       <div style="padding:24px">
@@ -44,13 +45,13 @@ export async function renderSettings(container, { profile }) {
           <div class="form-row">
             ${fileUploadField({ label:'Label Logo', accept:'image/jpeg,image/png,image/webp,image/svg+xml', hint:'PNG or SVG recommended', currentUrl: labelProfile?.label_logo_url || '', bucket:'covers', prefix:'logos/' })}
           </div>
-          ${isOwner ? `
           <div class="form-actions" style="margin-top:16px">
             <button type="submit" class="btn btn-primary">Save Profile</button>
-          </div>` : ''}
+          </div>
         </form>
       </div>
     </div>
+    ` : ''}
 
     <!-- My Account -->
     <div class="table-wrap" style="margin-bottom:24px">
