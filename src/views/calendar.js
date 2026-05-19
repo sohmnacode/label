@@ -6,17 +6,19 @@ const DAYS   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 export async function renderCalendar(container, { profile }) {
   container.innerHTML = `<div class="loading-full"><span class="spinner"></span> Loading…</div>`;
 
-  const [
-    { data: releases },
-    { data: contracts },
-    { data: pitches },
-    { data: pressPitches },
-  ] = await Promise.all([
-    supabase.from('releases').select('id, title, release_date, cover_url'),
-    supabase.from('contracts').select('id, title, expires_at'),
-    supabase.from('pitches').select('id, platform, target, pitched_at'),
-    supabase.from('press_pitches').select('id, outlet, sent_at').catch(() => ({ data: [] })),
+  const safe = q => q.then(r => r).catch(() => ({ data: null }));
+
+  const [r1, r2, r3, r4] = await Promise.all([
+    safe(supabase.from('releases').select('id, title, release_date')),
+    safe(supabase.from('contracts').select('id, title, expiry_date')),
+    safe(supabase.from('pitches').select('id, platform, target, pitched_at')),
+    safe(supabase.from('press_pitches').select('id, outlet, sent_at')),
   ]);
+
+  const releases     = r1.data || [];
+  const contracts    = r2.data || [];
+  const pitches      = r3.data || [];
+  const pressPitches = r4.data || [];
 
   let year  = new Date().getFullYear();
   let month = new Date().getMonth();
@@ -52,7 +54,7 @@ function drawMonth(container, data, year, month) {
   (data.releases || []).forEach(r =>
     addEvent(r.release_date, { label: r.title, color: 'var(--a)', type: 'release' }));
   (data.contracts || []).forEach(c =>
-    addEvent(c.expires_at, { label: c.title || 'Contract', color: 'var(--a2)', type: 'contract' }));
+    addEvent(c.expiry_date, { label: c.title || 'Contract', color: 'var(--a2)', type: 'contract' }));
   (data.pitches || []).forEach(p =>
     addEvent(p.pitched_at, { label: p.target || p.platform, color: 'var(--a3)', type: 'pitch' }));
   (data.pressPitches || []).forEach(p =>
