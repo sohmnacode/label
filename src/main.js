@@ -17,6 +17,9 @@ import { renderCalendar } from './views/calendar.js';
 import { renderBudget } from './views/budget.js';
 import { renderPress } from './views/press.js';
 import { renderArtistPortal } from './views/artist_portal.js';
+import { renderPublishing } from './views/publishing.js';
+import { renderActivity } from './views/activity.js';
+import { renderSettings } from './views/settings.js';
 
 const app = document.getElementById('app');
 
@@ -65,9 +68,13 @@ async function initApp(session) {
     ${renderNav(profile)}
     <div class="main">
       <div class="topbar">
+        <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Menu">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:18px;height:18px"><line x1="2" y1="4" x2="14" y2="4"/><line x1="2" y1="8" x2="14" y2="8"/><line x1="2" y1="12" x2="14" y2="12"/></svg>
+        </button>
         <span class="topbar-title" id="topbar-title">Dashboard</span>
         <div class="topbar-actions" id="topbar-actions"></div>
       </div>
+      <div id="nav-overlay" class="nav-overlay"></div>
       <div class="content" id="view-content"></div>
     </div>
   `;
@@ -86,8 +93,11 @@ async function initApp(session) {
   registerRoute('/budget',    s => renderBudget(content, s));
   registerRoute('/anr',       s => renderANR(content, s));
   registerRoute('/pitches',   s => renderPitches(content, s));
-  registerRoute('/calendar',  s => renderCalendar(content, s));
-  registerRoute('/press',     s => renderPress(content, s));
+  registerRoute('/calendar',    s => renderCalendar(content, s));
+  registerRoute('/press',       s => renderPress(content, s));
+  registerRoute('/publishing',  s => renderPublishing(content, s));
+  registerRoute('/activity',    s => renderActivity(content));
+  registerRoute('/settings',    s => renderSettings(content, s));
 
   initRouter(state);
 

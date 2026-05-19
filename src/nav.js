@@ -46,6 +46,14 @@ export function renderNav(profile) {
         { route: '/press',   icon: iconPress, label: 'Press',   show: isOwnerOrTeam },
       ],
     },
+    {
+      label: 'Admin',
+      links: [
+        { route: '/publishing', icon: iconPublish, label: 'Publishing', show: isOwnerOrTeam },
+        { route: '/activity',   icon: iconActivity, label: 'Activity',  show: true },
+        { route: '/settings',   icon: iconSettings, label: 'Settings',  show: true },
+      ],
+    },
   ];
 
   return `
@@ -106,6 +114,15 @@ export function bindNav() {
   updateGhostStatus();
   setInterval(updateGhostStatus, 15000);
 
+  // Mobile nav toggle
+  const mobileBtn = document.getElementById('mobile-menu-btn');
+  const navEl     = document.querySelector('.nav');
+  const overlay   = document.getElementById('nav-overlay');
+  const closeNav  = () => { navEl?.classList.remove('open'); overlay?.classList.remove('open'); };
+  mobileBtn?.addEventListener('click', () => { navEl?.classList.toggle('open'); overlay?.classList.toggle('open'); });
+  overlay?.addEventListener('click', closeNav);
+  document.querySelectorAll('.nav-link').forEach(el => el.addEventListener('click', closeNav));
+
   const signout = document.getElementById('nav-signout');
   if (signout) {
     signout.addEventListener('click', async () => {
@@ -127,3 +144,6 @@ const iconContract = `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor"
 const iconANR      = `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 2l1.5 3 3.5.5-2.5 2.5.5 3.5L8 10l-3 1.5.5-3.5L3 5.5l3.5-.5z"/></svg>`;
 const iconPitch    = `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 14L14 2M14 2H8M14 2v6"/></svg>`;
 const iconPress    = `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 4h12v8a1 1 0 01-1 1H3a1 1 0 01-1-1V4z"/><line x1="2" y1="4" x2="14" y2="4"/><line x1="5" y1="8" x2="11" y2="8"/><line x1="5" y1="11" x2="9" y2="11"/></svg>`;
+const iconPublish  = `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M5 8l2 2 4-4"/></svg>`;
+const iconActivity = `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="1,10 4,6 7,9 10,4 15,7"/></svg>`;
+const iconSettings = `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="2.5"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41"/></svg>`;

@@ -28,7 +28,10 @@ const ROUTE_TITLES = {
   '/contracts': 'Contracts',
   '/anr':       'A&R',
   '/pitches':   'Pitches',
-  '/press':     'Press & Radio',
+  '/press':      'Press & Radio',
+  '/publishing': 'Publishing',
+  '/activity':   'Activity',
+  '/settings':   'Settings',
 };
 
 function handleRoute() {

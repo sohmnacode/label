@@ -2,6 +2,7 @@ import { supabase } from '../supabase.js';
 import { openModal, closeModal } from '../modal.js';
 import { toast } from '../toast.js';
 import { spotifySearchTrack, isSpotifyConfigured } from '../v4.js';
+import { fileUploadField, bindFileUploads } from '../upload.js';
 
 function fmtDuration(sec) {
   if (!sec) return '—';
@@ -15,6 +16,36 @@ function parseDuration(str) {
   if (/^\d+$/.test(str)) return parseInt(str);
   const [m, s] = str.split(':').map(Number);
   return m * 60 + (s || 0);
+}
+
+let _currentAudio = null;
+let _currentPlayBtn = null;
+
+async function playAudio(btn, storagePath) {
+  // Toggle off if same track
+  if (_currentPlayBtn === btn && _currentAudio) {
+    _currentAudio.pause();
+    _currentAudio = null;
+    _currentPlayBtn = null;
+    btn.textContent = '▶';
+    return;
+  }
+  // Stop previous
+  if (_currentAudio) {
+    _currentAudio.pause();
+    if (_currentPlayBtn) _currentPlayBtn.textContent = '▶';
+  }
+  btn.textContent = '…';
+  btn.disabled = true;
+  const { data, error } = await supabase.storage.from('audio').createSignedUrl(storagePath, 3600);
+  btn.disabled = false;
+  if (error || !data?.signedUrl) { btn.textContent = '▶'; toast('Could not load audio', 'error'); return; }
+  _currentAudio  = new Audio(data.signedUrl);
+  _currentPlayBtn = btn;
+  btn.textContent = '⏸';
+  _currentAudio.play();
+  _currentAudio.onended = () => { btn.textContent = '▶'; _currentAudio = null; _currentPlayBtn = null; };
+  _currentAudio.onerror = () => { btn.textContent = '▶'; _currentAudio = null; _currentPlayBtn = null; toast('Playback error', 'error'); };
 }
 
 export async function renderTracklist(container, release, isOwner) {
@@ -39,6 +70,7 @@ export async function renderTracklist(container, release, isOwner) {
           <th>ISRC</th>
           <th>Duration</th>
           <th>Explicit</th>
+          <th style="width:40px">Audio</th>
           ${isOwner ? '<th></th>' : ''}
         </tr></thead>
         <tbody>
@@ -49,16 +81,26 @@ export async function renderTracklist(container, release, isOwner) {
               <td class="td-mono" style="color:var(--t3);font-size:11px">${t.isrc || '—'}</td>
               <td class="td-mono">${fmtDuration(t.duration_sec)}</td>
               <td>${t.explicit ? `<span class="badge badge-pink">E</span>` : '—'}</td>
+              <td>
+                ${t.audio_url
+                  ? `<button class="btn btn-ghost btn-sm btn-icon play-audio" data-path="${t.audio_url}" title="Play/Pause">▶</button>`
+                  : `<span style="color:var(--t4);font-size:11px">—</span>`}
+              </td>
               ${isOwner ? `<td class="td-actions">
                 <button class="btn btn-ghost btn-sm btn-icon edit-track" data-id="${t.id}" title="Edit">✎</button>
                 <button class="btn btn-danger btn-sm btn-icon del-track" data-id="${t.id}" title="Delete">✕</button>
               </td>` : ''}
             </tr>
-          `).join('') : `<tr class="empty-row"><td colspan="${isOwner ? 6 : 5}">No tracks yet</td></tr>`}
+          `).join('') : `<tr class="empty-row"><td colspan="${isOwner ? 7 : 6}">No tracks yet</td></tr>`}
         </tbody>
       </table>
     </div>
   `;
+
+  // Audio playback
+  container.querySelectorAll('.play-audio').forEach(btn => {
+    btn.addEventListener('click', e => { e.stopPropagation(); playAudio(btn, btn.dataset.path); });
+  });
 
   container.querySelector('#add-track')?.addEventListener('click', () => {
     const nextNum = (tracks?.length || 0) + 1;
@@ -120,6 +162,9 @@ function openTrackModal(track, releaseId, defaultNum, onSave) {
             <label for="explicit-cb" style="text-transform:none;font-size:13px;color:var(--t);cursor:pointer">Explicit content</label>
           </div>
         </div>
+        <div class="form-row">
+          ${fileUploadField({ label:'Audio File', accept:'audio/mpeg,audio/wav,audio/flac,audio/aiff', hint:'MP3, WAV, or FLAC · max 200MB', currentUrl: track?.audio_url ? '(file uploaded)' : '', bucket:'audio', prefix:'audio/' })}
+        </div>
         <div class="form-actions">
           <button type="button" class="btn btn-secondary" id="track-cancel">Cancel</button>
           <button type="submit" class="btn btn-primary">${isEdit ? 'Save' : 'Add Track'}</button>
@@ -128,12 +173,13 @@ function openTrackModal(track, releaseId, defaultNum, onSave) {
     `,
   });
 
+  bindFileUploads(body);
   body.querySelector('#track-cancel').addEventListener('click', closeModal);
 
   // Spotify track search
-  const tSearchBtn = body.querySelector('#track-search-btn');
+  const tSearchBtn   = body.querySelector('#track-search-btn');
   const tSearchInput = body.querySelector('#track-search-input');
-  const tResults = body.querySelector('#track-results');
+  const tResults     = body.querySelector('#track-results');
 
   if (tSearchBtn) {
     tSearchBtn.addEventListener('click', async () => {
@@ -166,7 +212,7 @@ function openTrackModal(track, releaseId, defaultNum, onSave) {
               if (r.explicit)     body.querySelector('#explicit-cb').checked    = true;
               if (r.track_number) body.querySelector('[name="track_number"]').value = r.track_number;
               tResults.style.display = 'none';
-              toast(`Filled from Spotify`, 'success');
+              toast('Filled from Spotify', 'success');
             });
           });
         }
@@ -181,6 +227,7 @@ function openTrackModal(track, releaseId, defaultNum, onSave) {
   body.querySelector('#track-form').addEventListener('submit', async e => {
     e.preventDefault();
     const fd = new FormData(e.target);
+    const audioInput = body.querySelector('[name^="fu-"][type="hidden"]');
     const payload = {
       release_id:   releaseId,
       title:        fd.get('title'),
@@ -188,6 +235,7 @@ function openTrackModal(track, releaseId, defaultNum, onSave) {
       isrc:         fd.get('isrc') || null,
       duration_sec: parseDuration(fd.get('duration')),
       explicit:     !!fd.get('explicit'),
+      audio_url:    audioInput?.value || track?.audio_url || null,
     };
 
     const { error } = isEdit
