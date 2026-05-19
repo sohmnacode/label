@@ -78,6 +78,21 @@ export async function renderSettings(container, { profile }) {
       </div>
     </div>
 
+    <!-- Contract Alerts (owner only) -->
+    ${isOwner ? `
+    <div class="table-wrap" style="margin-bottom:24px">
+      <div class="table-header"><span class="table-title">Contract Alerts</span></div>
+      <div style="padding:24px">
+        <p style="font-size:12px;color:var(--t3);margin-bottom:16px;line-height:1.6">
+          Daily email alerts are sent at 9am UTC when contracts are expiring within 60 days.
+          Powered by a Supabase Edge Function + Resend.<br>
+          See <code style="color:var(--a);font-size:11px">supabase-contract-alerts.sql</code> to schedule, and set <code style="color:var(--a);font-size:11px">RESEND_API_KEY</code> + <code style="color:var(--a);font-size:11px">ALERT_FROM_EMAIL</code> in your Supabase Edge Function secrets.
+        </p>
+        <button class="btn btn-secondary btn-sm" id="test-alert-btn">Send Test Alert</button>
+      </div>
+    </div>
+    ` : ''}
+
     <!-- Team Members (owner only) -->
     ${isOwner ? `
     <div class="table-wrap">
@@ -157,6 +172,32 @@ export async function renderSettings(container, { profile }) {
       if (error) toast(error.message, 'error');
       else toast('Role updated');
     });
+  });
+
+  // Test contract alert
+  container.querySelector('#test-alert-btn')?.addEventListener('click', async () => {
+    const btn = container.querySelector('#test-alert-btn');
+    btn.disabled = true;
+    btn.textContent = 'Sending…';
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await fetch(`${supabase.supabaseUrl}/functions/v1/contract-alerts`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+        body: '{}',
+      });
+      const json = await res.json();
+      if (!res.ok) toast(json.error || 'Function error', 'error');
+      else if (json.sent) toast(`Alert sent — ${json.contracts} contract${json.contracts > 1 ? 's' : ''} included`);
+      else toast('No expiring contracts found — nothing sent', 'info');
+    } catch (err) {
+      toast(err.message, 'error');
+    }
+    btn.disabled = false;
+    btn.textContent = 'Send Test Alert';
   });
 
   // Remove member
